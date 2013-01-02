@@ -14,17 +14,13 @@ import org.openqa.selenium.chrome.ChromeDriverService;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.interactions.Actions;
-import org.openqa.selenium.internal.seleniumemulation.ElementFinder;
-import org.openqa.selenium.internal.seleniumemulation.JavascriptLibrary;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.testng.Assert;
-import com.thoughtworks.selenium.SeleniumException;
 import com.thoughtworks.selenium.Wait;
 
 /**
- * BrowserEmulator is based on Selenium2(Webdriver) and adds some enhancements
- * @author ChenKan
+ * BrowserEmulator is based on Selenium2 and adds some enhancements
  */
 public class BrowserEmulator {
 
@@ -36,37 +32,19 @@ public class BrowserEmulator {
 	private static Logger logger = Logger.getLogger(BrowserEmulator.class.getName());
 
 	public BrowserEmulator() {
-		chooseBrowserCoreType(GlobalSettings.BrowserCoreType);
+		setupBrowserCoreType(GlobalSettings.BrowserCoreType);
 		browser = new WebDriverBackedSelenium(browserCore, "www.163.com");
 		javaScriptExecutor = (JavascriptExecutor) browserCore;
-		logger.info("Browser started :)");
+		logger.info("Started BrowserEmulator");
 	}
 
-	public RemoteWebDriver getBrowserCore() {
-		return browserCore;
-	}
-
-	public WebDriverBackedSelenium getBrowser() {
-		return browser;
-	}
-	
-	public JavascriptExecutor getJavaScriptExecutor() {
-		return javaScriptExecutor;
-	}
-
-	/**
-	 * Setup browser type
-	 * @param type
-	 */
 	@SuppressWarnings("deprecation")
-	private void chooseBrowserCoreType(int type) {
-
+	private void setupBrowserCoreType(int type) {
 		if (type == 1) {
 			browserCore = new FirefoxDriver();
 			logger.info("Using Firefox");
 			return;
 		}
-
 		if (type == 2) {
 			chromeServer = new ChromeDriverService.Builder().usingChromeDriverExecutable(new File(GlobalSettings.ChromeDriverPath)).usingAnyFreePort().build();
 			try {
@@ -80,7 +58,6 @@ public class BrowserEmulator {
 			logger.info("Using Chrome");
 			return;
 		}
-
 		if (type == 3) {
 			String ieDriverExe = "res/IEDriverServer_Win32_2.25.3.exe";	//TODO Read from prop.properties
 			System.setProperty("webdriver.ie.driver", ieDriverExe);
@@ -91,40 +68,41 @@ public class BrowserEmulator {
 			return;
 		}
 
-		Assert.fail("Pls setup correct browser type :(");
+		Assert.fail("Incorrect browser type");
+	}
+	
+	public RemoteWebDriver getBrowserCore() {
+		return browserCore;
 	}
 
-	/**
-	 * Open a url
-	 * @param url
-	 */
+	public WebDriverBackedSelenium getBrowser() {
+		return browser;
+	}
+	
+	public JavascriptExecutor getJavaScriptExecutor() {
+		return javaScriptExecutor;
+	}
+
 	public void open(String url) {
 		pause();
 		try {
 			browser.open(url);
 		} catch (Exception e) {
 			e.printStackTrace();
-			handleFailIssue("Open url " + url + " failed :(");
+			handleFailure("Failed to open url " + url);
 		}
-		logger.info("Open url " + url);
+		logger.info("Opened url " + url);
 	}
 
-	/**
-	 * Quit browser
-	 */
 	public void quit() {
 		pause();
 		browserCore.quit();
 		if (GlobalSettings.BrowserCoreType == 2) {
 			chromeServer.stop();
 		}
-		logger.info("Quit browser :)");
+		logger.info("Quitted BrowserEmulator");
 	}
 
-	/**
-	 * Click a element
-	 * @param xpath
-	 */
 	public void click(String xpath) {
 		pause();
 		waitForElementPresent(xpath);
@@ -132,16 +110,16 @@ public class BrowserEmulator {
 			clickTheClickable(xpath, System.currentTimeMillis(), 2500);
 		} catch (Exception e) {
 			e.printStackTrace();
-			handleFailIssue("Click " + xpath + " failed :(");
+			handleFailure("Failed to click " + xpath);
 		}
-		logger.info("Click " + xpath);
+		logger.info("Clicked " + xpath);
 	}
 
 	/**
-	 * Click a element until it's clickable or timeout
+	 * Click an element until it's clickable or timeout
 	 * @param xpath
 	 * @param startTime
-	 * @param timeout
+	 * @param timeout in millisecond
 	 * @throws Exception
 	 */
 	private void clickTheClickable(String xpath, long startTime, int timeout) throws Exception {
@@ -149,7 +127,7 @@ public class BrowserEmulator {
 			browserCore.findElementByXPath(xpath).click();
 		} catch (Exception e) {
 			if (System.currentTimeMillis() - startTime > timeout) {
-				logger.error("Element " + xpath + " is unclickable :(");
+				logger.info("Element " + xpath + " is unclickable");
 				throw new Exception(e);
 			} else {
 				Thread.sleep(500);
@@ -160,7 +138,8 @@ public class BrowserEmulator {
 	}
 
 	/**
-	 * Input text
+	 * Type text<br>
+	 * Before typing, try to clear existed text
 	 * @param xpath
 	 * @param text
 	 */
@@ -172,18 +151,86 @@ public class BrowserEmulator {
 		try {
 			we.clear();
 		} catch (Exception e) {
-			logger.warn("Failed to clear this textarea :(");
+			logger.warn("Failed to clear text at " + xpath);
 		}
 		try {
 			we.sendKeys(text);
 		} catch (Exception e) {
 			e.printStackTrace();
-			handleFailIssue("Input " + text + " at " + xpath + " failed :(");
+			handleFailure("Failed to type " + text + " at " + xpath);
 		}
 
-		logger.info("Input " + text + " at " + xpath);
+		logger.info("Type " + text + " at " + xpath);
 	}
 
+	/**
+	 * Hover/Mouseover
+	 * @param xpath
+	 */
+	public void mouseOver(String xpath) {
+		pause();
+		waitForElementPresent(xpath);
+
+		if (GlobalSettings.BrowserCoreType == 1) {
+			Assert.fail("Mouseover is not supported for Firefox now");
+		}
+		if (GlobalSettings.BrowserCoreType == 2) {
+			// First make mouse out of browser
+			Robot rb = null;
+			try {
+				rb = new Robot();
+			} catch (AWTException e) {
+				e.printStackTrace();
+			}
+			rb.mouseMove(0, 0);
+			
+			// Then hover
+			WebElement we = browserCore.findElement(By.xpath(xpath));
+			try {
+				Actions builder = new Actions(browserCore);
+				builder.moveToElement(we).build().perform();
+			} catch (Exception e) {
+				e.printStackTrace();
+				handleFailure("Failed to mouseover " + xpath);
+			}
+
+			logger.info("Mouseover " + xpath);
+			return;
+		} 
+		if (GlobalSettings.BrowserCoreType == 3) {
+			Assert.fail("Mouseover is not supported for IE now");
+		}
+		
+		Assert.fail("Incorrect browser type");
+	}
+
+	/**
+	 * Switch window/tab
+	 * @param windowTitle
+	 */
+	public void selectWindow(String windowTitle) {
+		pause();
+		browser.selectWindow(windowTitle);
+		logger.info("Switched to window " + windowTitle);
+	}
+
+	public void enterFrame(String xpath) {
+		pause();
+		browserCore.switchTo().frame(browserCore.findElementByXPath(xpath));
+		logger.info("Entered iframe " + xpath);
+	}
+
+	public void leaveFrame() {
+		pause();
+		browserCore.switchTo().defaultContent();
+		logger.info("Back default iframe");
+	}
+	
+	public void refresh() {
+		browserCore.navigate().refresh();
+		logger.info("Refreshed");
+	}
+	
 	/**
 	 * Mimic system-level keyboard event
 	 * @param keyCode
@@ -199,108 +246,10 @@ public class BrowserEmulator {
 		rb.keyPress(keyCode);	// press key
 		rb.delay(100); 			// delay 100ms
 		rb.keyRelease(keyCode);	// release key
-		logger.info("press keyboard " + keyCode);
+		logger.info("Pressed key with code " + keyCode);
 	}
 
 	//TODO Mimic system-level mouse event
-	
-	/**
-	 * Hover
-	 * @param xpath
-	 */
-	public void mouseOver(String xpath) {
-		pause();
-		waitForElementPresent(xpath);
-
-		if (GlobalSettings.BrowserCoreType == 1) {
-			Assert.fail("Mouseover is not supported now for Firefox :(");
-		}
-		
-		if (GlobalSettings.BrowserCoreType == 2) {
-			// First make mouse out of browser
-			Robot rb = null;
-			try {
-				rb = new Robot();
-			} catch (AWTException e) {
-				e.printStackTrace();
-			}
-			rb.mouseMove(0, 0);
-
-			// Then hover
-			WebElement we = browserCore.findElement(By.xpath(xpath));
-			try {
-				Actions builder = new Actions(browserCore);
-				builder.moveToElement(we).build().perform();
-			} catch (Exception e) {
-				e.printStackTrace();
-				handleFailIssue("Mouseover " + xpath + " failed :(");
-			}
-
-			logger.info("Mouseover " + xpath);
-			return;
-		} 
-
-		if (GlobalSettings.BrowserCoreType == 3) {
-			Assert.fail("Mouseover is not supported now for IE :(");
-		}
-		
-		Assert.fail("Pls setup correct browser type :(");
-	}
-
-	/**
-	 * Get text of a element
-	 * @param xpath
-	 * @return text
-	 */
-	public String getText(String xpath) {
-		pause();
-		waitForElementPresent(xpath);
-		String text = browserCore.findElementByXPath(xpath).getText();
-		logger.info("Get text " + text + " from " + xpath);
-		return text;
-	}
-
-	/**
-	 * Switch window/tab
-	 * @param windowTitle
-	 */
-	public void selectWindow(String windowTitle) {
-		pause();
-		browser.selectWindow(windowTitle);
-		logger.info("Switch to window " + windowTitle);
-	}
-
-	private void pause() {
-		int stepInterval = Integer.parseInt(GlobalSettings.StepInterval);
-		if (stepInterval > 0) {
-			try {
-				Thread.sleep(stepInterval);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		} else {
-			return;
-		}
-	}
-
-	private void waitForElementPresent(final String xpath) {
-		int timeout = Integer.parseInt(GlobalSettings.Timeout);
-		waitForElementPresent(xpath, timeout);
-	}
-	
-	private void waitForElementPresent(final String xpath, int timeout) {
-		try {
-			new Wait() {
-				public boolean until() {
-					return isElementPresent(browserCore, xpath);
-				}
-			}.wait("Can't find element " + xpath, timeout);
-		} catch (Exception e) {
-			e.printStackTrace();
-			handleFailIssue("Can't find element " + xpath);
-		}
-		logger.info("Found element " + xpath);
-	}
 
 	/**
 	 * Expect some text exist or not on the page
@@ -313,32 +262,27 @@ public class BrowserEmulator {
 			try {
 				new Wait() {
 					public boolean until() {
-						return isTextPresent(browserCore, text);
+						return browser.isTextPresent(text);
 					}
-				}.wait("Can't find text " + text, timeout);
+				}.wait("Failed to find text " + text, timeout);
 			} catch (Exception e) {
 				e.printStackTrace();
-				handleFailIssue("Can't find text " + text);
+				handleFailure("Failed to find text " + text);
 			}
 			logger.info("Found text " + text);
 		}
-
 		else {
-			try {
-				Thread.sleep(timeout);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			if (isTextPresent(browserCore, text)) {
-				handleFailIssue("Found text " + text);
+			pause(timeout);
+			if (browser.isTextPresent(text)) {
+				handleFailure("Found undesired text " + text);
 			} else {
-				logger.info("Can't find text " + text);
+				logger.info("Not found text " + text);
 			}
 		}
 	}
 
 	/**
-	 * Expect element exist or not on the page
+	 * Expect an element exist or not on the page
 	 * @param expectExist
 	 * @param xpath
 	 * @param timeout in millisecond
@@ -351,103 +295,85 @@ public class BrowserEmulator {
 					public boolean until() {
 						return browserCore.findElementByXPath(xpath).isDisplayed();
 					}
-				}.wait("Can't find element " + xpath, timeout);
+				}.wait("Failed to find element " + xpath, timeout);
 			} catch (Exception e) {
 				e.printStackTrace();
-				handleFailIssue("Can't find element " + xpath);
+				handleFailure("Failed to find element " + xpath);
 			}
 			logger.info("Found element " + xpath);
 		}
-
 		else {
-			try {
-				Thread.sleep(timeout);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+			pause(timeout);
 			if (browserCore.findElementByXPath(xpath).isDisplayed()) {
-				handleFailIssue("Found element " + xpath);
+				handleFailure("Found undesired element " + xpath);
 			} else {
-				logger.info("Can't find element " + xpath);
+				logger.info("Not found element " + xpath);
 			}
 		}
 	}
 
 	public boolean isTextPresent(String text) {
-		if (isTextPresent(browserCore, text)) {
+		if (browser.isTextPresent(text)) {
 			logger.info("Found text " + text);
 		} else {
-			logger.info("Can't find text " + text);
+			logger.info("Not found text " + text);
 		}
-		return isTextPresent(browserCore, text);
+		return browser.isTextPresent(text);
 	}
 
 	public boolean isElementPresent(String xpath) {
-		if (browserCore.findElementByXPath(xpath).isDisplayed()) {
+		if (browserCore.findElementByXPath(xpath).isDisplayed()) {	//TODO Bug here
 			logger.info("Found element " + xpath);
 		} else {
-			logger.info("Can't find element" + xpath);
+			logger.info("Not found element" + xpath);
 		}
 		return browserCore.findElementByXPath(xpath).isDisplayed();
 	}
-
+	
+	private void pause() {
+		int stepInterval = Integer.parseInt(GlobalSettings.StepInterval);
+		pause(stepInterval);
+	}
+	
 	/**
-	 * Copy from Selenium source code 
-	 * - WebDriverCommandProcessor.java
-	 * - IsElementPresent.java
-	 * @param driver
-	 * @param xpath
-	 * @return
+	 * Pause
+	 * @param time in millisecond
 	 */
-	private boolean isElementPresent(RemoteWebDriver driver, String xpath) {
+	private void pause(int time) {
 		try {
-			JavascriptLibrary javascriptLibrary = new JavascriptLibrary();
-			ElementFinder finder = new ElementFinder(javascriptLibrary);
-			finder.findElement(driver, xpath);
-			return true;
-		} catch (SeleniumException e) {
-			return false;
-		} catch (RuntimeException e) {
+			Thread.sleep(time);
+		} catch (InterruptedException e) {
 			e.printStackTrace();
-			return false;
 		}
 	}
 
-	/**
-	 * Copy from Selenium source code
-	 * - WebDriverCommandProcessor.java
-	 * - IsTextPresent.java
-	 * @param driver
-	 * @param text
-	 * @return
-	 */
-	private boolean isTextPresent(RemoteWebDriver driver, String text) {
-		JavascriptLibrary javascriptLibrary = new JavascriptLibrary();
-		String script = javascriptLibrary.getSeleniumScript("isTextPresent.js");
-		Boolean result = (Boolean) ((JavascriptExecutor) driver).executeScript("return (" + script + ")(arguments[0]);", text);
-		return Boolean.TRUE == result;
-	}
-
-	public void refresh() {
-		browserCore.navigate().refresh();
-		logger.info("Refreshed");
-	}
-
-	public void enterFrame(String xpath) {
-		pause();
-		browserCore.switchTo().frame(browserCore.findElementByXPath(xpath));
-		logger.info("Enter iframe " + xpath);
-	}
-
-	public void leaveFrame() {
-		pause();
-		browserCore.switchTo().defaultContent();
-		logger.info("Back top iframe");
+	private void waitForElementPresent(final String xpath) {
+		int timeout = Integer.parseInt(GlobalSettings.Timeout);
+		waitForElementPresent(xpath, timeout);
 	}
 	
-	private void handleFailIssue(String notice) {
+	/**
+	 * Wait for element present
+	 * @param xpath
+	 * @param timeout in millisecond
+	 */
+	private void waitForElementPresent(final String xpath, int timeout) {	//TODO
+		try {
+			new Wait() {
+				public boolean until() {
+					return browser.isElementPresent(xpath);
+				}
+			}.wait("Failed to find element " + xpath, timeout);
+		} catch (Exception e) {
+			e.printStackTrace();
+			handleFailure("Failed to find element " + xpath);
+		}
+		logger.info("Found element " + xpath);
+	}
+	
+	private void handleFailure(String notice) {
 		String png = LogTools.screenShot(this);
-		String log = notice + " screenshot at " + png;
+		String log = notice + " >> capture screenshot at " + png;
 		logger.error(log);
 		Assert.fail(log);
 	}
