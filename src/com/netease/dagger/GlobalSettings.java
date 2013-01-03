@@ -10,6 +10,8 @@ public class GlobalSettings {
 	public static int BrowserCoreType = Integer.parseInt(prop.getProperty("BrowserCoreType", "2"));
 
 	public static String ChromeDriverPath = prop.getProperty("ChromeDriverPath", "res/chromedriver.exe");
+	
+	public static String IEDriverPath = prop.getProperty("IEDriverPath", "res/iedriver_32.exe");
 
 	public static String StepInterval = prop.getProperty("StepInterval", "500");
 

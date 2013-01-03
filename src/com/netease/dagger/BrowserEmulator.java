@@ -62,8 +62,7 @@ public class BrowserEmulator {
 			return;
 		}
 		if (type == 3) {
-			String ieDriverExe = "res/IEDriverServer_Win32_2.25.3.exe";	//TODO Read from prop.properties
-			System.setProperty("webdriver.ie.driver", ieDriverExe);
+			System.setProperty("webdriver.ie.driver", GlobalSettings.IEDriverPath);
 			DesiredCapabilities capabilities = DesiredCapabilities.internetExplorer();
 			capabilities.setCapability(InternetExplorerDriver.INTRODUCE_FLAKINESS_BY_IGNORING_SECURITY_DOMAINS, true);
 			browserCore = new InternetExplorerDriver(capabilities);
