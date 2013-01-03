@@ -29,6 +29,9 @@ public class BrowserEmulator {
 	ChromeDriverService chromeServer;
 	JavascriptExecutor javaScriptExecutor;
 	
+	int stepInterval = Integer.parseInt(GlobalSettings.StepInterval);
+	int timeout = Integer.parseInt(GlobalSettings.Timeout);
+	
 	private static Logger logger = Logger.getLogger(BrowserEmulator.class.getName());
 
 	public BrowserEmulator() {
@@ -84,7 +87,7 @@ public class BrowserEmulator {
 	}
 
 	public void open(String url) {
-		pause();
+		pause(stepInterval);
 		try {
 			browser.open(url);
 		} catch (Exception e) {
@@ -95,7 +98,7 @@ public class BrowserEmulator {
 	}
 
 	public void quit() {
-		pause();
+		pause(stepInterval);
 		browserCore.quit();
 		if (GlobalSettings.BrowserCoreType == 2) {
 			chromeServer.stop();
@@ -104,8 +107,8 @@ public class BrowserEmulator {
 	}
 
 	public void click(String xpath) {
-		pause();
-		waitForElementPresent(xpath);
+		pause(stepInterval);
+		expectElementExistOrNot(true, xpath, timeout);
 		try {
 			clickTheClickable(xpath, System.currentTimeMillis(), 2500);
 		} catch (Exception e) {
@@ -144,8 +147,8 @@ public class BrowserEmulator {
 	 * @param text
 	 */
 	public void type(String xpath, String text) {
-		pause();
-		waitForElementPresent(xpath);
+		pause(stepInterval);
+		expectElementExistOrNot(true, xpath, timeout);
 
 		WebElement we = browserCore.findElement(By.xpath(xpath));
 		try {
@@ -168,8 +171,8 @@ public class BrowserEmulator {
 	 * @param xpath
 	 */
 	public void mouseOver(String xpath) {
-		pause();
-		waitForElementPresent(xpath);
+		pause(stepInterval);
+		expectElementExistOrNot(true, xpath, timeout);
 
 		if (GlobalSettings.BrowserCoreType == 1) {
 			Assert.fail("Mouseover is not supported for Firefox now");
@@ -209,25 +212,25 @@ public class BrowserEmulator {
 	 * @param windowTitle
 	 */
 	public void selectWindow(String windowTitle) {
-		pause();
+		pause(stepInterval);
 		browser.selectWindow(windowTitle);
 		logger.info("Switched to window " + windowTitle);
 	}
 
 	public void enterFrame(String xpath) {
-		pause();
+		pause(stepInterval);
 		browserCore.switchTo().frame(browserCore.findElementByXPath(xpath));
 		logger.info("Entered iframe " + xpath);
 	}
 
 	public void leaveFrame() {
-		pause();
+		pause(stepInterval);
 		browserCore.switchTo().defaultContent();
 		logger.info("Back default iframe");
 	}
 	
 	public void refresh() {
-		pause();
+		pause(stepInterval);
 		browserCore.navigate().refresh();
 		logger.info("Refreshed");
 	}
@@ -237,7 +240,7 @@ public class BrowserEmulator {
 	 * @param keyCode
 	 */
 	public void pressKeyboard(int keyCode) {
-		pause();
+		pause(stepInterval);
 		Robot rb = null;
 		try {
 			rb = new Robot();
@@ -332,11 +335,6 @@ public class BrowserEmulator {
 		}
 	}
 	
-	private void pause() {
-		int stepInterval = Integer.parseInt(GlobalSettings.StepInterval);
-		pause(stepInterval);
-	}
-	
 	/**
 	 * Pause
 	 * @param time in millisecond
@@ -347,11 +345,6 @@ public class BrowserEmulator {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-	}
-
-	private void waitForElementPresent(final String xpath) {
-		int timeout = Integer.parseInt(GlobalSettings.Timeout);
-		expectElementExistOrNot(true, xpath, timeout);
 	}
 	
 	private void handleFailure(String notice) {
