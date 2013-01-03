@@ -227,6 +227,7 @@ public class BrowserEmulator {
 	}
 	
 	public void refresh() {
+		pause();
 		browserCore.navigate().refresh();
 		logger.info("Refreshed");
 	}
@@ -262,21 +263,20 @@ public class BrowserEmulator {
 			try {
 				new Wait() {
 					public boolean until() {
-						return browser.isTextPresent(text);
+						return isTextPresent(text);
 					}
 				}.wait("Failed to find text " + text, timeout);
 			} catch (Exception e) {
 				e.printStackTrace();
 				handleFailure("Failed to find text " + text);
 			}
-			logger.info("Found text " + text);
-		}
-		else {
+			logger.info("Found desired text " + text);
+		} else {
 			pause(timeout);
-			if (browser.isTextPresent(text)) {
+			if (isTextPresent(text)) {
 				handleFailure("Found undesired text " + text);
 			} else {
-				logger.info("Not found text " + text);
+				logger.info("Not found undesired text " + text);
 			}
 		}
 	}
@@ -289,45 +289,47 @@ public class BrowserEmulator {
 	 */
 	public void expectElementExistOrNot(boolean expectExist, final String xpath, int timeout) {
 		if (expectExist) {
-			waitForElementPresent(xpath, timeout);
 			try {
 				new Wait() {
 					public boolean until() {
-						return browserCore.findElementByXPath(xpath).isDisplayed();
+						return isElementPresent(xpath);
 					}
 				}.wait("Failed to find element " + xpath, timeout);
 			} catch (Exception e) {
 				e.printStackTrace();
 				handleFailure("Failed to find element " + xpath);
 			}
-			logger.info("Found element " + xpath);
-		}
-		else {
+			logger.info("Found desired element " + xpath);
+		} else {
 			pause(timeout);
-			if (browserCore.findElementByXPath(xpath).isDisplayed()) {
+			if (isElementPresent(xpath)) {
 				handleFailure("Found undesired element " + xpath);
 			} else {
-				logger.info("Not found element " + xpath);
+				logger.info("Not found undesired element " + xpath);
 			}
 		}
 	}
 
 	public boolean isTextPresent(String text) {
-		if (browser.isTextPresent(text)) {
+		boolean isPresent = browser.isTextPresent(text);
+		if (isPresent) {
 			logger.info("Found text " + text);
+			return true;
 		} else {
 			logger.info("Not found text " + text);
+			return false;
 		}
-		return browser.isTextPresent(text);
 	}
 
 	public boolean isElementPresent(String xpath) {
-		if (browserCore.findElementByXPath(xpath).isDisplayed()) {	//TODO Bug here
+		boolean isPresent = browser.isElementPresent(xpath) && browserCore.findElementByXPath(xpath).isDisplayed();
+		if (isPresent) {
 			logger.info("Found element " + xpath);
+			return true;
 		} else {
 			logger.info("Not found element" + xpath);
+			return false;
 		}
-		return browserCore.findElementByXPath(xpath).isDisplayed();
 	}
 	
 	private void pause() {
@@ -349,26 +351,7 @@ public class BrowserEmulator {
 
 	private void waitForElementPresent(final String xpath) {
 		int timeout = Integer.parseInt(GlobalSettings.Timeout);
-		waitForElementPresent(xpath, timeout);
-	}
-	
-	/**
-	 * Wait for element present
-	 * @param xpath
-	 * @param timeout in millisecond
-	 */
-	private void waitForElementPresent(final String xpath, int timeout) {	//TODO
-		try {
-			new Wait() {
-				public boolean until() {
-					return browser.isElementPresent(xpath);
-				}
-			}.wait("Failed to find element " + xpath, timeout);
-		} catch (Exception e) {
-			e.printStackTrace();
-			handleFailure("Failed to find element " + xpath);
-		}
-		logger.info("Found element " + xpath);
+		expectElementExistOrNot(true, xpath, timeout);
 	}
 	
 	private void handleFailure(String notice) {
