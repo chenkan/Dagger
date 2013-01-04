@@ -9,7 +9,7 @@ public class GlobalSettings {
 
 	public static int BrowserCoreType = Integer.parseInt(prop.getProperty("BrowserCoreType", "2"));
 
-	public static String ChromeDriverPath = prop.getProperty("ChromeDriverPath", "res/chromedriver.exe");
+	public static String ChromeDriverPath = prop.getProperty("ChromeDriverPath", "res/chromedriver_for_win.exe");
 	
 	public static String IEDriverPath = prop.getProperty("IEDriverPath", "res/iedriver_32.exe");
 
