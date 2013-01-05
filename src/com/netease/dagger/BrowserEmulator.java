@@ -73,18 +73,35 @@ public class BrowserEmulator {
 		Assert.fail("Incorrect browser type");
 	}
 	
+	/**
+	 * Get the WebDriver instance embedded in BrowserEmulator
+	 * @return a WebDriver instance
+	 */
 	public RemoteWebDriver getBrowserCore() {
 		return browserCore;
 	}
 
+	/**
+	 * Get the WebDriverBackedSelenium instance embedded in BrowserEmulator
+	 * @return a WebDriverBackedSelenium instance
+	 */
 	public WebDriverBackedSelenium getBrowser() {
 		return browser;
 	}
 	
+	/**
+	 * Get the JavascriptExecutor instance embedded in BrowserEmulator
+	 * @return a JavascriptExecutor instance
+	 */
 	public JavascriptExecutor getJavaScriptExecutor() {
 		return javaScriptExecutor;
 	}
 
+	/**
+	 * Open the URL
+	 * @param url
+	 *            the target URL
+	 */
 	public void open(String url) {
 		pause(stepInterval);
 		try {
@@ -96,6 +113,9 @@ public class BrowserEmulator {
 		logger.info("Opened url " + url);
 	}
 
+	/**
+	 * Quit the browser
+	 */
 	public void quit() {
 		pause(stepInterval);
 		browserCore.quit();
@@ -105,6 +125,11 @@ public class BrowserEmulator {
 		logger.info("Quitted BrowserEmulator");
 	}
 
+	/**
+	 * Click the page element
+	 * @param xpath
+	 *            the element's xpath
+	 */
 	public void click(String xpath) {
 		pause(stepInterval);
 		expectElementExistOrNot(true, xpath, timeout);
@@ -140,10 +165,12 @@ public class BrowserEmulator {
 	}
 
 	/**
-	 * Type text<br>
+	 * Type text at the page element<br>
 	 * Before typing, try to clear existed text
 	 * @param xpath
+	 *            the element's xpath
 	 * @param text
+	 *            the input text
 	 */
 	public void type(String xpath, String text) {
 		pause(stepInterval);
@@ -166,8 +193,9 @@ public class BrowserEmulator {
 	}
 
 	/**
-	 * Hover/Mouseover
+	 * Hover on the page element
 	 * @param xpath
+	 *            the element's xpath
 	 */
 	public void mouseOver(String xpath) {
 		pause(stepInterval);
@@ -209,6 +237,7 @@ public class BrowserEmulator {
 	/**
 	 * Switch window/tab
 	 * @param windowTitle
+	 *            the window/tab's title
 	 */
 	public void selectWindow(String windowTitle) {
 		pause(stepInterval);
@@ -216,18 +245,29 @@ public class BrowserEmulator {
 		logger.info("Switched to window " + windowTitle);
 	}
 
+	/**
+	 * Enter the iframe
+	 * @param xpath
+	 *            the iframe's xpath
+	 */
 	public void enterFrame(String xpath) {
 		pause(stepInterval);
 		browserCore.switchTo().frame(browserCore.findElementByXPath(xpath));
 		logger.info("Entered iframe " + xpath);
 	}
 
+	/**
+	 * Leave the iframe
+	 */
 	public void leaveFrame() {
 		pause(stepInterval);
 		browserCore.switchTo().defaultContent();
-		logger.info("Back default iframe");
+		logger.info("Left the iframe");
 	}
 	
+	/**
+	 * Refresh the browser
+	 */
 	public void refresh() {
 		pause(stepInterval);
 		browserCore.navigate().refresh();
@@ -237,6 +277,7 @@ public class BrowserEmulator {
 	/**
 	 * Mimic system-level keyboard event
 	 * @param keyCode
+	 *            such as KeyEvent.VK_TAB, KeyEvent.VK_F11
 	 */
 	public void pressKeyboard(int keyCode) {
 		pause(stepInterval);
@@ -255,10 +296,15 @@ public class BrowserEmulator {
 	//TODO Mimic system-level mouse event
 
 	/**
-	 * Expect some text exist or not on the page
+	 * Expect some text exist or not on the page<br>
+	 * Expect text exist, but not found after timeout => Assert fail<br>
+	 * Expect text not exist, but found after timeout => Assert fail
 	 * @param expectExist
+	 *            true or false
 	 * @param text
-	 * @param timeout in millisecond
+	 *            the expected text
+	 * @param timeout
+	 *            timeout in millisecond
 	 */
 	public void expectTextExistOrNot(boolean expectExist, final String text, int timeout) {
 		if (expectExist) {
@@ -284,10 +330,16 @@ public class BrowserEmulator {
 	}
 
 	/**
-	 * Expect an element exist or not on the page
+	 * Expect an element exist or not on the page<br>
+	 * Expect element exist, but not found after timeout => Assert fail<br>
+	 * Expect element not exist, but found after timeout => Assert fail<br>
+	 * Here <b>exist</b> means <b>visible</b>
 	 * @param expectExist
+	 *            true or false
 	 * @param xpath
-	 * @param timeout in millisecond
+	 *            the expected element's xpath
+	 * @param timeout
+	 *            timeout in millisecond
 	 */
 	public void expectElementExistOrNot(boolean expectExist, final String xpath, int timeout) {
 		if (expectExist) {
@@ -312,6 +364,12 @@ public class BrowserEmulator {
 		}
 	}
 
+	/**
+	 * Is the text present on the page
+	 * @param text
+	 *            the expected text
+	 * @return
+	 */
 	public boolean isTextPresent(String text) {
 		boolean isPresent = browser.isTextPresent(text);
 		if (isPresent) {
@@ -323,6 +381,13 @@ public class BrowserEmulator {
 		}
 	}
 
+	/**
+	 * Is the element present on the page<br>
+	 * Here <b>present</b> means <b>visible</b>
+	 * @param xpath
+	 *            the expected element's xpath
+	 * @return
+	 */
 	public boolean isElementPresent(String xpath) {
 		boolean isPresent = browser.isElementPresent(xpath) && browserCore.findElementByXPath(xpath).isDisplayed();
 		if (isPresent) {
