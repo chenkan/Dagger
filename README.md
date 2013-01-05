@@ -8,16 +8,18 @@ Dagger is a design style at last: the framework and the testcases based on it bo
 
 * Wiki: <https://github.com/chenkan/Dagger/wiki>
 * Issues: <https://github.com/chenkan/Dagger/issues>
+* Javadoc: <http://chenkan.github.com/DaggerJavaDoc>
 * Tags: Selenium, TestNg, autotest
 
 ## Features
 
-* Easy to learn while only less then 20 APIs altogether, see <https://github.com/chenkan/Dagger/wiki>.
-* Providing a quickstart, see <https://github.com/chenkan/Dagger/wiki>.
+* Easy to learn while only less then 20 APIs altogether, see [this](http://chenkan.github.com/DaggerJavaDoc/classcom_1_1netease_1_1dagger_1_1_browser_emulator.html).
+* Providing a quickstart, see [this](https://github.com/chenkan/Dagger/wiki/Quick-Start).
 * High speed with parallel mode which is indeed TestNg's feature.
-* High stability with a trick on TestNg to retry failed/skipped testcases automatically, see <http://qa.blog.163.com/blog/static/1901470022012611722547>.
+* High stability with a trick on TestNg to retry failed/skipped testcases automatically, see [this](http://qa.blog.163.com/blog/static/1901470022012611722547).
 * Using Chrome as default browser which is much more quick and stable than Firefox and IE. 
 * Firefox and IE are also supported.
+* Capture screenshot automatically when testcase failed.
 
 ## Coming soon
 
