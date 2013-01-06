@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<project default="demo">
+
+	<taskdef resource="testngtasks" classpath="lib/testng-re-html.jar" />
+
+	<path id="cpath">
+		<fileset dir="lib">
+			<include name="*.jar" />
+			<include name="**/*.jar"/>
+		</fileset>
+	</path>
+
+	<path id="runpath">
+		<pathelement location="bin" />
+		<path refid="cpath" />
+	</path>
+
+	<target name="compile">
+		<delete dir="bin" />
+		<mkdir dir="bin" />
+		<javac destdir="bin" classpathref="cpath" srcdir="src" debug="true" encoding="UTF8">
+		</javac>
+		<copy file="src/log4j.properties" tofile="bin/log4j.properties" />
+	</target>
+
+	<target name="demo" depends="compile">
+		<delete dir="test-output" />
+		<mkdir dir="test-output" />
+		<testng outputDir="test-output" classpathref="runpath" >
+			<xmlfileset dir="test-xml" includes="demo.xml" />
+		</testng>
+	</target>
+
+</project>
