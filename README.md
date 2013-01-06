@@ -2,9 +2,11 @@
 
 Dagger is a light, robust Web UI autotest framework based on [Selenium](http://seleniumhq.org/) and [TestNg](http://testng.org/doc/index.html).
 
-Dagger is an automation framework first, it provides APIs to control browsers; 
-Dagger is a test framework then, it uses TestNg to organize testcases and TestNg's assertions are embedded in APIs above; 
-Dagger is a design style at last: the framework and the testcases based on it both should be light and straightforward.
+> Dagger is an automation framework first, it provides APIs to control browsers;
+> 
+> Dagger is a test framework then, it uses TestNg to organize testcases and TestNg's assertions are embedded in APIs above;
+> 
+> Dagger is a design style at last: the framework and the testcases based on it both should be light and straightforward.
 
 * Wiki: <https://github.com/chenkan/Dagger/wiki>
 * Issues: <https://github.com/chenkan/Dagger/issues>
