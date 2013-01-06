@@ -1,4 +1,4 @@
-<suite verbose="10" name="demo" annotations="JDK" time-out="1800000">
+<suite reruntimes="2" thread-count="10" parallel="tests" verbose="10" name="demo" annotations="JDK" time-out="1800000">
 
 	<test name="TestNg" junit="false" annotations="JDK">
 		<classes>
