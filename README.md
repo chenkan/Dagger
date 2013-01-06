@@ -17,8 +17,8 @@ Dagger is a light, robust Web UI autotest framework based on [Selenium](http://s
 
 * Easy to learn while only less then 20 APIs altogether, see [this](http://chenkan.github.com/DaggerJavaDoc/classcom_1_1netease_1_1dagger_1_1_browser_emulator.html).
 * Providing a quickstart, see [this](https://github.com/chenkan/Dagger/wiki/Quick-Start).
-* High speed with parallel mode which is indeed TestNg's feature.
-* High stability with a trick on TestNg to retry failed/skipped testcases automatically, see [this](http://qa.blog.163.com/blog/static/1901470022012611722547).
+* High speed with parallel mode which is indeed TestNg's feature, see [this](https://github.com/chenkan/Dagger/wiki/Parallel-Mode)
+* High stability with a trick on TestNg to retry failed/skipped testcases automatically, see [this](https://github.com/chenkan/Dagger/wiki/Retry-Failed-Or-Skipped-Testcases).
 * Using Chrome as default browser which is much more quick and stable than Firefox and IE. 
 * Firefox and IE are also supported.
 * Capture screenshot automatically when testcase failed.
